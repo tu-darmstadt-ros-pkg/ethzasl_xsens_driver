@@ -137,9 +137,10 @@ class XSensDriver(object):
         self.imu_freq = TopicDiagnostic("imu/data", self.updater,
                                         FrequencyStatusParam({'min': 0, 'max': 100}, 0.1, 10),
                                         TimeStampStatusParam())
-        self.mag_freq = TopicDiagnostic("imu/mag", self.updater,
-                                        FrequencyStatusParam({'min': 0, 'max': 100}, 0.1, 10),
-                                        TimeStampStatusParam())
+
+        #self.mag_freq = TopicDiagnostic("imu/mag", self.updater,
+        #                                FrequencyStatusParam({'min': 0, 'max': 100}, 0.1, 10),
+        #                                TimeStampStatusParam())
 
         # publishers created at first use to reduce topic clutter
         self.imu_pub = None
