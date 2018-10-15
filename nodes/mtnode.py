@@ -95,6 +95,8 @@ class XSensDriver(object):
         self.frame_id = get_param('~frame_id', '/base_imu')
         self.frame_local = get_param('~frame_local', 'ENU')
 
+        self.pub_gps_diagnostics = get_param('~pub_gps_diagnostics', True)
+
         self.angular_velocity_covariance = matrix_from_diagonal(
             get_param_list('~angular_velocity_covariance_diagonal', [radians(0.025)] * 3)
         )
@@ -126,7 +128,10 @@ class XSensDriver(object):
 
         self.updater.add("Self Test", self.diagnostic_self_test)
         self.updater.add("XKF", self.diagnostic_xkf)
-        self.updater.add("GPS Fix", self.diagnostic_gps)
+
+        if self.pub_gps_diagnostics:
+            self.updater.add("GPS Fix", self.diagnostic_gps)
+
         self.updater.add("Device Info", self.diagnostic_device)
 
         self.imu_freq = TopicDiagnostic("imu/data", self.updater,
@@ -426,22 +431,24 @@ class XSensDriver(object):
             else:
                 self.xkf_stat.level = DiagnosticStatus.WARN
                 self.xkf_stat.message = "Invalid"
-            if status & 0b0100:
-                self.gps_stat.level = DiagnosticStatus.OK
-                self.gps_stat.message = "Ok"
-                self.raw_gps_msg.status.status = NavSatStatus.STATUS_FIX
-                self.raw_gps_msg.status.service = NavSatStatus.SERVICE_GPS
-                # we borrow the status from the raw gps for pos_gps_msg
-                self.pos_gps_msg.status.status = NavSatStatus.STATUS_FIX
-                self.pos_gps_msg.status.service = NavSatStatus.SERVICE_GPS
-            else:
-                self.gps_stat.level = DiagnosticStatus.WARN
-                self.gps_stat.message = "No fix"
-                self.raw_gps_msg.status.status = NavSatStatus.STATUS_NO_FIX
-                self.raw_gps_msg.status.service = 0
-                # we borrow the status from the raw gps for pos_gps_msg
-                self.pos_gps_msg.status.status = NavSatStatus.STATUS_NO_FIX
-                self.pos_gps_msg.status.service = 0
+
+            if self.pub_gps_diagnostics:
+                if status & 0b0100:
+                    self.gps_stat.level = DiagnosticStatus.OK
+                    self.gps_stat.message = "Ok"
+                    self.raw_gps_msg.status.status = NavSatStatus.STATUS_FIX
+                    self.raw_gps_msg.status.service = NavSatStatus.SERVICE_GPS
+                    # we borrow the status from the raw gps for pos_gps_msg
+                    self.pos_gps_msg.status.status = NavSatStatus.STATUS_FIX
+                    self.pos_gps_msg.status.service = NavSatStatus.SERVICE_GPS
+                else:
+                    self.gps_stat.level = DiagnosticStatus.WARN
+                    self.gps_stat.message = "No fix"
+                    self.raw_gps_msg.status.status = NavSatStatus.STATUS_NO_FIX
+                    self.raw_gps_msg.status.service = 0
+                    # we borrow the status from the raw gps for pos_gps_msg
+                    self.pos_gps_msg.status.status = NavSatStatus.STATUS_NO_FIX
+                    self.pos_gps_msg.status.service = 0
 
         def fill_from_Sample(ts):
             '''Catch 'Sample' MTData blocks.'''
