@@ -791,7 +791,7 @@ class XSensDriver(object):
             if self.mag_pub is None:
                 self.mag_pub = rospy.Publisher('imu/mag', MagneticField,
                                                queue_size=10)
-            self.mag_freq.tick(self.h.stamp)
+            #self.mag_freq.tick(self.h.stamp)
             self.mag_pub.publish(self.mag_msg)
         if self.pub_temp:
             self.temp_msg.header = self.h
