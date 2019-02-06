@@ -158,7 +158,7 @@ class XSensDriver(object):
         self.old_bGPS = 256  # publish GPS only if new
 
         # publish a string version of all data; to be parsed by clients
-        self.str_pub = rospy.Publisher('imu_data_str', String, queue_size=10)
+        #self.str_pub = rospy.Publisher('imu_data_str', String, queue_size=10)
         self.last_delta_q_time = None
         self.delta_q_rate = None
 
@@ -711,11 +711,12 @@ class XSensDriver(object):
 
         def fill_from_Magnetic(o):
             '''Fill messages with information from 'Magnetic' MTData2 block.'''
-            x, y, z = o['magX'], o['magY'], o['magZ']
-            self.mag_msg.magnetic_field.x = x
-            self.mag_msg.magnetic_field.y = y
-            self.mag_msg.magnetic_field.z = z
-            self.pub_mag = True
+            #x, y, z = o['magX'], o['magY'], o['magZ']
+            #self.mag_msg.magnetic_field.x = x
+            #self.mag_msg.magnetic_field.y = y
+            #self.mag_msg.magnetic_field.z = z
+            #self.pub_mag = True
+            pass
 
         def fill_from_Velocity(o):
             '''Fill messages with information from 'Velocity' MTData2 block.'''
@@ -823,7 +824,7 @@ class XSensDriver(object):
             self.ecef_pub.publish(self.ecef_msg)
 
         # publish string representation
-        self.str_pub.publish(str(data))
+        #self.str_pub.publish(str(data))
         self.updater.update()
 
 
