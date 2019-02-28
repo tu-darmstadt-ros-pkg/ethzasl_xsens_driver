@@ -60,6 +60,7 @@ class XSensDriver(object):
         baudrate = get_param('~baudrate', 0)
         timeout = get_param('~timeout', 0.002)
         initial_wait = get_param('~initial_wait', 0.1)
+        retry = get_param('~retry', 5)
         if device == 'auto':
             devs = mtdevice.find_devices(timeout=timeout,
                                          initial_wait=initial_wait)
@@ -80,8 +81,29 @@ class XSensDriver(object):
             return
 
         rospy.loginfo("MT node interface: %s at %d bd." % (device, baudrate))
-        self.mt = mtdevice.MTDevice(device, baudrate, timeout,
-                                    initial_wait=initial_wait)
+
+        while True:
+            try:
+                self.mt = mtdevice.MTDevice(device, baudrate, timeout,
+                                            initial_wait=initial_wait)
+                rospy.loginfo("Started MT device on port %s @ %d bps"
+                              % (device, baudrate))
+                break
+            except serial.serialutil.SerialException as e:
+                rospy.logerr("SerialException: %s, trying again in %d secs."
+                             % (e, retry))
+                rospy.sleep(retry)
+                pass
+            except mtdef.MTException as e:
+                rospy.logerr("MTException: %s, trying again in %d secs."
+                             % (e, retry))
+                rospy.sleep(retry)
+                pass
+            except Exception as e:
+                rospy.logerr("Exception: %s, trying again in %d secs."
+                             % (e, retry))
+                rospy.sleep(retry)
+                pass
 
         # optional no rotation procedure for internal calibration of biases
         # (only mark iv devices)
